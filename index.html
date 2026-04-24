@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="AphidSim teaching edition: a static GitHub Pages-ready aphid population and host-plant simulation with downloadable synthetic datasets."
+    />
+    <title>AphidSim teaching edition</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Invertebrates in a changing world</p>
+        <h1>AphidSim teaching edition</h1>
+        <p>
+          A browser-based mesocosm simulator for exploring aphid population growth, host-plant condition,
+          climate stress, and downloadable teaching datasets.
+        </p>
+      </div>
+      <div class="header-badges" aria-label="Application properties">
+        <span>Static site</span>
+        <span>No server</span>
+        <span>CSV / JSON export</span>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <aside class="control-panel" aria-label="Simulation controls">
+        <section class="panel-card">
+          <div class="section-heading">
+            <p class="eyebrow">Experimental setup</p>
+            <h2>Configure the mesocosm</h2>
+          </div>
+
+          <label for="studentId">Student or group ID</label>
+          <input id="studentId" type="text" autocomplete="off" />
+
+          <label for="scenarioId">Scenario</label>
+          <select id="scenarioId"></select>
+
+          <div class="scenario-card" aria-live="polite">
+            <h3 id="scenarioTitle"></h3>
+            <p id="scenarioDescription"></p>
+            <strong>Prediction prompt</strong>
+            <p id="scenarioHypothesis"></p>
+          </div>
+
+          <div class="two-col-controls">
+            <div>
+              <label for="seed">Seed</label>
+              <input id="seed" type="number" min="1" step="1" />
+            </div>
+            <div>
+              <label for="management">Management</label>
+              <select id="management"></select>
+            </div>
+          </div>
+          <p class="hint" id="managementDescription"></p>
+
+          <label class="range-label" for="initialAphids">
+            Initial inoculum <span id="initialAphidsValue"></span>
+          </label>
+          <input id="initialAphids" type="range" min="10" max="250" step="5" />
+
+          <label class="range-label" for="days">
+            Duration <span id="daysValue"></span>
+          </label>
+          <input id="days" type="range" min="7" max="42" step="1" />
+
+          <label class="range-label" for="meanTemp">
+            Mean temperature <span id="meanTempValue"></span>
+          </label>
+          <input id="meanTemp" type="range" min="8" max="31" step="0.5" />
+
+          <label class="range-label" for="tempAmplitude">
+            Daily fluctuation <span id="tempAmplitudeValue"></span>
+          </label>
+          <input id="tempAmplitude" type="range" min="0" max="8" step="0.5" />
+
+          <div class="button-grid">
+            <button id="runSimulation" type="button" class="primary">Run simulation</button>
+            <button id="newSeed" type="button">New seed</button>
+            <button id="resetDefaults" type="button">Reset</button>
+          </div>
+        </section>
+
+        <section class="panel-card downloads">
+          <div class="section-heading">
+            <p class="eyebrow">Downloadable data</p>
+            <h2>Export for analysis</h2>
+          </div>
+          <button id="downloadCsv" type="button">Download current CSV</button>
+          <button id="downloadJson" type="button">Download current JSON + metadata</button>
+          <button id="downloadClassCsv" type="button">Download class dataset CSV</button>
+          <button id="downloadNotes" type="button">Download model notes</button>
+          <p class="hint">
+            CSV files include observed counts with measurement error and modelled process variables. The class dataset pools
+            five scenarios with eight replicate experiments each.
+          </p>
+        </section>
+
+        <section class="panel-card compact">
+          <div class="section-heading">
+            <p class="eyebrow">Model caveat</p>
+            <h2>Use as synthetic teaching data</h2>
+          </div>
+          <p>
+            This is a mechanistic teaching simulator, not a fitted forecast. It is designed to create plausible patterns,
+            explicit assumptions, and analysis-ready data for practical classes.
+          </p>
+        </section>
+      </aside>
+
+      <section class="dashboard" aria-label="Simulation outputs">
+        <div class="status-row">
+          <p id="statusMessage" role="status"></p>
+        </div>
+
+        <section class="metrics-grid" id="summaryCards" aria-label="Summary metrics"></section>
+
+        <section class="chart-grid">
+          <article class="chart-card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Population dynamics</p>
+                <h2>Life-stage trajectory</h2>
+              </div>
+            </div>
+            <div id="populationChart" class="chart"></div>
+          </article>
+
+          <article class="chart-card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Host and climate</p>
+                <h2>Plant condition and thermal regime</h2>
+              </div>
+            </div>
+            <div id="environmentChart" class="chart"></div>
+          </article>
+
+          <article class="chart-card wide">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Daily processes</p>
+                <h2>Births, mortalities, and alate emigration</h2>
+              </div>
+            </div>
+            <div id="processChart" class="chart"></div>
+          </article>
+        </section>
+
+        <section id="interpretation" class="interpretation-card"></section>
+
+        <section class="data-card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">Raw data preview</p>
+              <h2>Daily observations</h2>
+            </div>
+            <span id="dataRowCount" class="pill"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th>Temp °C</th>
+                  <th>Plant %</th>
+                  <th>Total obs.</th>
+                  <th>Nymphs</th>
+                  <th>Apterous</th>
+                  <th>Alates</th>
+                  <th>Fecundity</th>
+                  <th>Mortality</th>
+                  <th>Alate frac.</th>
+                  <th>Intervention</th>
+                  <th>Event note</th>
+                </tr>
+              </thead>
+              <tbody id="dataTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="metadata-card">
+          <div class="section-heading">
+            <p class="eyebrow">Reproducibility</p>
+            <h2>Current run metadata</h2>
+          </div>
+          <div id="metadataText"></div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
